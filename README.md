@@ -1,7 +1,7 @@
 # NV_batch
-Batch file to generate WSOR figures for NV. This is reproducible, allowing anyone with Python installed on their local machine to generate these figures
+Batch file to generate WSOR figures for NV. This is reproducible, allowing anyone with Python installed on their local machine to generate these figures.
 
-Before running it, there are some setup steps that must be taken
+Before running it, there are some setup steps that must be taken.
 
 ## Setup Instructions (first time only)
 
@@ -20,14 +20,15 @@ pip install -r requirements.txt
 
 
 ## Configuration (every time you generate the report for a new month/year)
-Open config.txt in notepad or whatever text editor you prefer and set the ReportYear and ReportMonth appropriately
+1. Open config.txt in notepad or whatever text editor you prefer and set the ReportYear and ReportMonth appropriately
+2. Save and close the config file.
 
 ## Running the Pipeline
 Simply double-click **GenerateReport.bat**
-A Command Prompt window will open, keeping you updated on progress and alerting you of any errors
+A Command Prompt window will open, keeping you updated on progress and alerting you of any errors.
 
 ## Troubleshooting
 The most likely issue you will run into is if you try to run the .bat file while you have the files you are trying to write open.<br>
-Make sure to close Word and Adobe PDF viewer down before running to be on the safe side
+Make sure to close Word and Adobe PDF viewer down before running to be on the safe side.
 
 
