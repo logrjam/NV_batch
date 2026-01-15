@@ -24,7 +24,8 @@ pip install -r requirements.txt
 2. Save and close the config file.
 
 ## Running the Pipeline
-Simply double-click **GenerateReport.bat**
+Simply double-click **GenerateReport.bat** 
+
 A Command Prompt window will open, keeping you updated on progress and alerting you of any errors.
 
 ## Troubleshooting
