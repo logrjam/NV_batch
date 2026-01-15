@@ -12,8 +12,11 @@ Wherever you unzipped this zip file will work. If you created a GitHub repositor
 4. Paste file path and hit enter. Command Prompt should now show the full path of the NV_batch folder
 5. Copy and paste the following three lines, hitting enter after each one:
 python -m venv WSOR_NV_env
+
 WSOR_NV_env\Scripts\activate
+
 pip install -r requirements.txt
+
 
 ## Configuration (every time you generate the report for a new month/year)
 Open config.txt in notepad or whatever text editor you prefer and set the ReportYear and ReportMonth appropriately
