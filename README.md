@@ -11,6 +11,7 @@ Wherever you unzipped this zip file will work. If you created a GitHub repositor
 3. Open Command Prompt and type: cd
 4. Paste file path and hit enter. Command Prompt should now show the full path of the NV_batch folder
 5. Copy and paste the following three lines, hitting enter after each one:
+
 python -m venv WSOR_NV_env
 
 WSOR_NV_env\Scripts\activate
