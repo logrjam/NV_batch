@@ -9,7 +9,7 @@ Before running it, there are some setup steps that must be taken
 Wherever you unzipped this zip file will work. If you created a GitHub repository for this, use that location.
 2. In File Explorer, right click the path for this folder and copy it.
 3. Open Command Prompt and type: cd
-4. Paste file path and hit enter. Command Prompt should now show the full path of the NV_batch folder
+4. Paste file path (with a space after cd) and hit enter. Command Prompt should now show the full path of the NV_batch folder
 5. Copy and paste the following three lines, hitting enter after each one:
 
 python -m venv WSOR_NV_env
