@@ -1,16 +1,16 @@
 # NV_batch
 Batch file to generate WSOR figures for NV. This is reproducible, allowing anyone with Python installed on their local machine to generate these figures.
 
-Before running it, there are some setup steps that must be taken.
+Before running it, there are some setup steps that must be taken. Please read through all steps before doing anything.
 
 ## Setup Instructions (first time only)
 
-1. Create a new folder called NV_batch wherever you want this script to live.<br>
-Wherever you unzipped this zip file will work. If you created a GitHub repository for this, use that location.
-2. In File Explorer, right click the path for this folder and copy it.
-3. Open Command Prompt and type: cd
-4. Paste file path (with a space after cd) and hit enter. Command Prompt should now show the full path of the NV_batch folder
-5. Copy and paste the following three lines, hitting enter after each one:
+1. Make sure you have Python downloaded. You can download it from the Software Center. The newest version will be fine (3.12 at this time).
+2. If using GitHub, clone the NV_batch repository to your local machine. If you received NV_batch as a zip file, unzip this file wherever you want it to live.
+3. In File Explorer, right click the path for the NV_batch file and copy it as text.
+4. Open Command Prompt and change directory to your copied file path by typing and then hit enter: cd <paste file path here>
+5. Command Prompt should now show the full path of the NV_batch folder.
+6. Copy and paste the following three lines, hitting enter after each one:
 
 python -m venv WSOR_NV_env
 
