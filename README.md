@@ -18,8 +18,8 @@ WSOR_NV_env\Scripts\activate
 
 pip install -r requirements.txt
 
-6. When the code runs, it will save the generated figures into a few locations. You need to make sure these folders exist beforehand.
-7. Create the following folders at the specified path if they don't already exist:
+6. When the code runs, it will save the generated figures into a few locations. You need to make sure these folders exist beforehand. <br>
+Create the following folders at the specified path if they don't already exist:
 
 C:\USDA\Work\ReportDocs\Jeff_WSOR_Docs\Figs
 
@@ -37,7 +37,7 @@ Simply double-click **GenerateReport.bat**
 A Command Prompt window will open, keeping you updated on progress and alerting you of any errors.
 
 ## Troubleshooting
-The most likely issue you will run into is if you try to run the .bat file while you have the files you are trying to write open.<br>
-Make sure to close Word and Adobe PDF viewer down before running to be on the safe side.
+The most likely issue you will run into is if you try to run the .bat file (which generates word docs, figures, and pdfs) if you have MS Word or one of the files you are trying to write open. <br>
+Make sure to close down Word, Adobe, and any figure files before running.
 
 
