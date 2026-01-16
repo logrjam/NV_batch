@@ -8,7 +8,7 @@ Before running it, there are some setup steps that must be taken. Please read th
 1. Make sure you have Python downloaded. You can download it from the Software Center. The newest version will be fine (3.12 at this time).
 2. If using GitHub, clone the NV_batch repository to your local machine. If you received NV_batch as a zip file, unzip this folder wherever you want it to live.
 3. In File Explorer, right click the path for the NV_batch folder and copy it as text.
-4. Open Command Prompt and change directory to your copied file path by typing cd followed by a space and then pasting your file path: cd <paste file path>
+4. Open Command Prompt and change directory to your copied file path by typing cd followed by a space and then pasting your file path: cd paste_file_path
 5. Hit enter. Command Prompt should now show the full path of the NV_batch folder.
 6. Copy and paste the following three lines, hitting enter after each one:
 
