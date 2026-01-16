@@ -22,7 +22,7 @@ WSOR_NV_env\Scripts\activate
 pip install -r requirements.txt
 
 6. When the code runs, it will save the generated figures into a few locations. You need to make sure these folders exist beforehand. <br>
-Create the following folders (exact formatting) at the specified path if they don't already exist:
+Create the following folders (exact wording) at the specified path if they don't already exist:
 
 C:\USDA\Work\ReportDocs\Jeff_WSOR_Docs\Figs
 
