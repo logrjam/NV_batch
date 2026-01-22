@@ -15,9 +15,9 @@ cd paste_file_path
 6. Hit enter. Command Prompt should now show the full path of the NV_batch folder.
 7. Copy and paste the following three lines, hitting enter after each one:
 
-python -m venv WSOR_NV_env
+python -m venv .venv
 
-WSOR_NV_env\Scripts\activate
+.venv\Scripts\activate
 
 pip install -r requirements.txt
 
