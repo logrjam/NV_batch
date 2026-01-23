@@ -10,7 +10,7 @@ REM -----------------------------------------
 REM 2. Activate the virtual environment
 REM  
 REM -----------------------------------------
-call WSOR_NV_env\Scripts\activate.bat
+call .venv\Scripts\activate.bat
 
 
 REM -----------------------------------------
