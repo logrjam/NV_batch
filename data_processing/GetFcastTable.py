@@ -5,7 +5,7 @@ Created on Fri Jan  9 13:21:16 2026
 @author: Logan.Jamison
 """
 
-def GetFcastTable(ReportMonth, ReportYear):
+def GetFcastTable(ReportMonth, ReportYear, RiseInAPI=True):
     
     import pandas as pd
     # import numpy as np
@@ -13,7 +13,7 @@ def GetFcastTable(ReportMonth, ReportYear):
     # import matplotlib.pyplot as plt
     import requests
     import os
-    
+    from datetime import datetime
 
     rootpath = 'C:/USDA/Work/ReportDocs/Jeff_WSOR_Docs/'
     
@@ -53,7 +53,55 @@ def GetFcastTable(ReportMonth, ReportYear):
                 'site_meta': fcast_json[watershed][0]['site_meta']
             }
     
-    
+        # build Tahoe Rise rows and reformat to match what other fcast points will look like in table
+        month_map = {
+            "01": "JAN", "02": "FEB", "03": "MAR", "04": "APR",
+            "05": "MAY", "06": "JUN", "07": "JUL", "08": "AUG",
+            "09": "SEP", "10": "OCT", "11": "NOV", "12": "DEC"
+        }
+        
+        
+        tahoe_rows = []
+        if RiseInAPI:
+            for item in rise_json[1]['data']:
+                if datetime.strptime(item['publicationDate'],"%Y-%m-%d %H:%M").month == ReportMonth: # only grab for current publication month
+                    raw_period = item['forecastPeriod']
+                    month_num = raw_period[0].split("-")[0]
+                    month_abbrev = month_map[month_num]
+                    level = raw_period[1]
+                
+                    period = f"{month_abbrev}-{level}"
+                
+                    values = item['forecastValues']
+                
+                    row = {
+                        "name": rise_json[1]['forecastPointName'],
+                        "Forecast Period": period,
+                        "90 (KAF)": values.get("90"),
+                        "70 (KAF)": values.get("70"),
+                        "50 (KAF)": values.get("50"),
+                        "30 (KAF)": values.get("30"),
+                        "10 (KAF)": values.get("10"),
+                        "30yr Median (KAF)": None,
+                        "% Median": None
+                    }
+                
+                    tahoe_rows.append(row)
+                else: continue
+        else:
+              row = {
+                  "name": "Lake Tahoe Rise Gates Closed",
+                  "Forecast Period": None,
+                  "90 (KAF)": None,
+                  "70 (KAF)": None,
+                  "50 (KAF)": None,
+                  "30 (KAF)": None,
+                  "10 (KAF)": None,
+                  "30yr Median (KAF)": None,
+                  "% Median": None
+              }
+          
+              tahoe_rows.append(row)
 
     
 
@@ -101,7 +149,9 @@ def GetFcastTable(ReportMonth, ReportYear):
         for item in fcast_data:
             rows.extend(build_rows(item))
         df = pd.DataFrame(rows) # convert to dataframe
-
+        if watershed == 'lake tahoe': # add in GSL rise rows
+            df = pd.concat([df, pd.DataFrame(tahoe_rows)], ignore_index=True)
+        
         new_order = [
             "name",
             "Forecast Period",
@@ -122,6 +172,7 @@ def GetFcastTable(ReportMonth, ReportYear):
 
     #%%
     
+    # Create word doc table from dict of dataframes and convert to PDF
     from docx import Document
     from docx.shared import Inches, Pt
     from docx.oxml import OxmlElement
@@ -129,7 +180,18 @@ def GetFcastTable(ReportMonth, ReportYear):
     from docx.enum.text import WD_BREAK
     from docx2pdf import convert
     
-    asterisk = "\u20F0"
+    # asterisk = "\u20F0"
+    
+    # Formatting functions
+    def shade_cell(cell, fill):
+        """fill = hex color like 'D9D9D9' (no #)"""
+        tc = cell._tc
+        tcPr = tc.get_or_add_tcPr()
+        shd = OxmlElement('w:shd')
+        shd.set(qn('w:val'), 'clear')
+        shd.set(qn('w:color'), 'auto')
+        shd.set(qn('w:fill'), fill)
+        tcPr.append(shd)
     
     def remove_table_borders(table): 
         tbl = table._tbl
@@ -149,6 +211,28 @@ def GetFcastTable(ReportMonth, ReportYear):
         trPr = tr.get_or_add_trPr()
         cant_split = OxmlElement('w:cantSplit')
         trPr.append(cant_split)
+    
+    # def format_vals(val): # function to remove trailing zeros from whole numbers and round unruly numbers
+    #     # Leave blanks alone
+    #     if val is None or val == "":
+    #         return "" 
+    #     try:
+    #         s = str(val).strip()
+    #         f = float(s)
+    #         # Whole number → drop .0
+    #         if f.is_integer():
+    #             return str(int(f))
+    #         # If there's a decimal, check how many places
+    #         if "." in s:
+    #             decimals = len(s.split(".")[1])
+    #             # Already nicely formatted (1–2 decimals)
+    #             if decimals <= 2:
+    #                 return s
+    #             # Too many decimals → round to 2
+    #             return f"{f:.2f}"
+    #         return s
+    #     except Exception:
+    #         return str(val)
 
     def format_vals(val): # function to remove trailing zeros from whole numbers
         # Leave blanks alone
@@ -163,7 +247,7 @@ def GetFcastTable(ReportMonth, ReportYear):
             return str(val)
         except:
             return str(val)
-
+    
     def tighten_cell_paragraphs(table):
         for row in table.rows:
             for cell in row.cells:
@@ -190,33 +274,35 @@ def GetFcastTable(ReportMonth, ReportYear):
         p = paragraph.paragraph_format
         p.space_before = Pt(before)
         p.space_after = Pt(after)
-
-
+    
+    
     def shrink_table_font(table, size=9):
         for row in table.rows:
             for cell in row.cells:
                 for para in cell.paragraphs:
                     for run in para.runs:
                         run.font.size = Pt(size)
-
+    
     # function to build word document from forecast dictionary
-    def df_dict_to_word(df_dict, output_path):
+    def df_dict_to_word(df_dict):
         # first = True # first table
-        doc = Document()
+        
     
         for name, df in df_dict.items():
+            
+            doc = Document()
             
             # if not first: # add page break if not the first table
             #     doc.add_page_break()
             # first = False
-
+    
             # Remove repeated forecast point names, keep only first instance
             df.loc[df["Forecast Point"].duplicated(), "Forecast Point"] = ""
-
+    
             # Add centered title
             title_para = doc.add_paragraph()
             title_para.alignment = 1 # Centered
-            run1 = title_para.add_run("Forecast Exceedance Probabilities for Risk Assessment\n") 
+            run1 = title_para.add_run("Water Supply Forecast Table\n") 
             run2 = title_para.add_run("Chance that actual volume will exceed forecast") 
             run1.bold = True 
             run2.italic = True
@@ -224,13 +310,14 @@ def GetFcastTable(ReportMonth, ReportYear):
             
             # watershed name as heading
             doc.add_heading(name.title(), level=2) # title() capitalizes each word of watershed
-
+    
             # Create table 
             table = doc.add_table(rows=1, cols=len(df.columns))
-
+            table.style = "Table Grid"
+            
             set_cell_margins(table, top=0, bottom=0, start=40, end=40)
-
-            remove_table_borders(table)
+    
+            # remove_table_borders(table)
     
             # Add header cells
             hdr_cells = table.rows[0].cells
@@ -240,23 +327,36 @@ def GetFcastTable(ReportMonth, ReportYear):
             prevent_row_split(table.rows[0])
     
             # Add data rows
-            for _, row in df.iterrows():
+            for r_idx,(_, row) in enumerate(df.iterrows()):
                 row_cells = table.add_row().cells
+                
+                # alternating shading (skip header row)
+                if r_idx % 2 == 1: 
+                    for c in row_cells: shade_cell(c, "EDEDED") # light gray
+                    
                 for i, val in enumerate(row):
+                    if pd.isna(val): #fill Nans with blanks (should only apply to lake rise)
+                        val= ""
                     row_cells[i].text = format_vals(val)                   
                 # add asterisk for GSL inflow only
-                if name.lower() == 'great salt lake' and row['Forecast Point'] =='Great Salt Lake Inflow':
-                   row_cells[0].text = row_cells[0].text + "*"               
+                # if name.lower() == 'great salt lake' and row['Forecast Point'] =='Great Salt Lake Inflow':
+                #    row_cells[0].text = row_cells[0].text + "*"    
+                # if name.lower() == 'great salt lake' and row['Forecast Point'] =='Great Salt Lake Rise':
+                #    row_cells[0].text = row_cells[0].text + "**"  
+                   
                 prevent_row_split(table.rows[-1])
             tighten_cell_paragraphs(table)
             #tighten_cell_paragraphs(table)
     
             # add footer to only GSL table
-            if name.lower() == 'great salt lake':
-                foot_para = doc.add_paragraph()  
-                run3 = foot_para.add_run(asterisk+' Unlike other forecast values in this table, the GSL inflow forecast does not correct for upstream management actions, i.e. is not a "naturalized" forecast.')
- 
-                run3.font.size = Pt(10)
+            # if name.lower() == 'great salt lake':
+            #     foot_para = doc.add_paragraph()  
+            #     run3 = foot_para.add_run('* Unlike other forecast values in this table, the GSL inflow forecast does not correct for upstream management actions, i.e. is not a "naturalized" forecast.\n')
+            #     run4 = foot_para.add_run('** Units = feet. Please be advised that the lake level rise forecast for the GSL is meant to be advisory only given the uncertainty in the modeling and the preponderance of water management actions in the basin.')
+    
+            #     run3.font.size = Pt(10)
+            #     run4.font.size = Pt(10)
+               
             # tighten_paragraph_spacing(foot_para, before=0, after=2)
             
             # Add spacing between tables
@@ -265,85 +365,24 @@ def GetFcastTable(ReportMonth, ReportYear):
             
             
             shrink_table_font(table, size=9)
-
-        # Save the Word document
-        doc.save(output_path)
-
-
-    output_docx = rootpath + "WordDocs/" + "All_Forecast_Tables.docx"
-
-    df_dict_to_word(dfs, output_docx)
-    
-    fcast_pdf = rootpath +"PDFs/96A_ForecastSummaryTable.pdf"
-    convert(output_docx,fcast_pdf)
-
-    #%% Convert to PDF directly from Dataframe- not good
-    
-    # from reportlab.lib.pagesizes import letter
-    # from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer, Paragraph
-    # from reportlab.lib import colors
-    # from reportlab.lib.styles import getSampleStyleSheet
-    
-    # def df_dict_to_pdf(df_dict, pdf_filename):
-    #     elements = []
-    #     pdf = SimpleDocTemplate(pdf_filename, pagesize=letter)
-    
-    #     styles = getSampleStyleSheet()
-    #     title_style = styles["Heading3"]
-    
-    #     # Style for wrapped table cells
-    #     cell_style = styles["BodyText"]
-    #     cell_style.wordWrap = 'CJK'
-    
-    #     for name, df in df_dict.items():
-    
-    #         # Add title
-    #         elements.append(Paragraph(name, title_style))
-    #         elements.append(Spacer(1, 6))
-    
-    #         # Build table data with wrapped cells
-    #         table_data = []
-    
-    #         # Header row
-    #         header = [Paragraph(str(col), cell_style) for col in df.columns]
-    #         table_data.append(header)
-    
-    #         # Data rows
-    #         for _, row in df.iterrows():
-    #             table_data.append([Paragraph(str(val), cell_style) for val in row])
-    
-    #         # Create table
-    #         table = Table(table_data)
-    
-    #         # Style the table
-    #         style = TableStyle([
-    #             ("BACKGROUND", (0,0), (-1,0), colors.lightgrey),
-    #             ("FONTNAME", (0,0), (-1,0), "Helvetica-Bold"),
-    #             ("ALIGN", (0,0), (-1,-1), "LEFT"),
-    #             ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
-    #             ("VALIGN", (0,0), (-1,-1), "TOP"),  # important for wrapped text
-    #         ])
-    #         table.setStyle(style)
-    
-    #         # Add table to PDF (ReportLab will auto-split across pages)
-    #         elements.append(table)
-    #         elements.append(Spacer(1, 20))
-    
-    #     pdf.build(elements)
-    
-        
-        
-    # output_pdf = os.path.join(rootpath, "All_Forecast_Tables.pdf")
-    
-    # df_dict_to_pdf(dfs, output_pdf)
-    
-    
-    
-    
-    
-    
-
-        
-        
-
             
+            output_path = rootpath + f"WordDocs/{name}_forecast_table.docx"
+            # Save the Word document
+            doc.save(output_path)
+            
+            # convert to pdf
+            fcast_pdf = rootpath + f"PDFs/{name}_forecast_table.pdf"
+            convert(output_path,fcast_pdf)
+    
+    # output_docx = rootpath + "WordDocs/" + "All_Forecast_Tables.docx"
+    
+    df_dict_to_word(dfs)
+    
+    # fcast_pdf = rootpath +"PDFs/96A_ForecastSummaryTable.pdf"
+    # convert(output_docx,fcast_pdf)
+    
+    
+    
+    
+    
+              
