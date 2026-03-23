@@ -52,7 +52,7 @@ def main():
 
             
     watershedlist = [  
-                            'state_of_nevada_and_eastern_sierra',
+                            'state_of_nevada',#'_and_eastern_sierra',
                             'lake_tahoe',
                             'truckee',
                             'carson',
@@ -96,7 +96,7 @@ def main():
         # curmoi = moi[str(wy-2)+'-10-01':str(wy-1)+'-0'+str(ReportMonth)+'-01']
         
         if len(res) != 0:
-            if wshed!='state_of_nevada_and_eastern_sierra':
+            if wshed!='state_of_nevada':
              
                 res = res.sort_values('res_cap', ascending = False)
                 
@@ -447,7 +447,7 @@ def main():
         ax2.plot(curswe[swe.columns[1]],color='black',linewidth=2,label='Current\nConditions') #current
         ax2.set(ylabel = "Snow Water Equivalent (Inches)")
         
-        if (wshed== 'clover_valley_and_franklin' or wshed == 'spring_mtns' or wshed=='state_of_nevada_and_eastern_sierra' or wshed=='surprise_valley-warner_mtns'):
+        if (wshed== 'clover_valley_and_franklin' or wshed == 'spring_mtns' or wshed=='state_of_nevada' or wshed=='surprise_valley-warner_mtns'):
             ax2.legend(fontsize=8,loc='upper right', bbox_to_anchor=(1, 0.95),frameon=True)
         else:
             ax2.legend(fontsize=8,loc='upper right',frameon=True)
@@ -494,7 +494,7 @@ def main():
         barmult = .05  
         #If there are reservoirs do this stuff
         if (len(res) != 0):
-            if wshed!='state_of_nevada_and_eastern_sierra':
+            if wshed!='state_of_nevada':
     
                 idx = np.asarray([i for i in range(len(res))])
                 ax4 = fig.add_subplot(224)

@@ -17,7 +17,7 @@ def LoadBasicReportData_WSOR_NV(ReportMonth,ReportYear):
     
     
     watershedlist = [  
-                        'state of nevada and eastern sierra',
+                        'state of nevada',#' and eastern sierra',
                         'lake tahoe',
                         'truckee',
                         'carson',

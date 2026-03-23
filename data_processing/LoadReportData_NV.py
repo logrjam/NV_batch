@@ -131,13 +131,13 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     
 
     
-    if watershed =='state_of_nevada_and_eastern_sierra':
+    if watershed =='state_of_nevada':
         allsites = ['Lake Tahoe','Marlette Lk nr Carson City','Donner Lake','Prosser Reservoir','Independence Lake','Stampede Reservoir','Boca Reservoir','Lahontan Reservoir','Topaz Lk nr Topaz','Bridgeport Reservoir','Rye Patch Re nr Rye Patch, NV','Chimney Creek Reservoir','Wild Horse Reservoir','Lake Mohave','Lake Mead','Lake Powell']
         subbasins = []
         subbasin_clean = []
         SWSI_shed = []
         fname = "00_NVCA_Statewide"
-        wshed_alt = 'state of nevada and eastern sierra'
+        wshed_alt = 'state of nevada'
         cleantxt = 'State of Nevada and Eastern Sierra'     
     elif watershed == 'lake_tahoe':
         allsites = ['Lake Tahoe','Marlette Lk nr Carson City']
@@ -289,7 +289,7 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
         res = ind_res_df[ind_res_df.index.isin(allsites)]
     
     # reservoirs on colorado need to be handled differently    
-    if  allsites!=[] and (watershed =='Upper_Colorado_Region' or watershed =='state_of_nevada_and_eastern_sierra') :  
+    if  allsites!=[] and (watershed =='Upper_Colorado_Region' or watershed =='state_of_nevada') :  
         # need to grab lakes powell, mead, and mohave separately
         # make sure wy is converted to calendar year (only needed for autumn time reports)
 
@@ -314,7 +314,7 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
         col_res_df['res_ly_per_cap'] = (col_res_df['res_ly']/col_res_df['res_cap']*100)
         col_res_df = col_res_df.set_index('name')
         # slap colorado res numbers into bigger dataframe
-        if watershed == 'state_of_nevada_and_eastern_sierra':
+        if watershed == 'state_of_nevada':
             res = pd.concat([res, col_res_df])
         else: res = col_res_df # for Upper Colorado Watershed
     elif allsites ==[]:
@@ -330,16 +330,16 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     
     
     print('Downloading SWE, PCP, and Soil Moisture Data')
-    if watershed !='state_of_nevada_and_eastern_sierra' and watershed !='surprise_valley-warner_mtns' and watershed != 'Upper_Colorado_Region':
+    if watershed !='state_of_nevada' and watershed !='surprise_valley-warner_mtns' and watershed != 'Upper_Colorado_Region':
         #download precip, swe, and soil moisture data from the web
         pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv_8/%s.csv' %(watershed))
         sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv_8/%s.csv'%(watershed))
         moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUCnv_8/%s.csv'%(watershed))
-    elif watershed =='state_of_nevada_and_eastern_sierra':
+    elif watershed =='state_of_nevada':
         #statewide data
-        sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv3/state_of_nevada_and_eastern_sierra.csv')
-        pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv3/state_of_nevada_and_eastern_sierra.csv')
-        moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUCnv3/state_of_nevada_and_eastern_sierra.csv')
+        sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv3/state_of_nevada.csv')
+        pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv3/state_of_nevada.csv')
+        moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUCnv3/state_of_nevada.csv')
     elif watershed == 'surprise_valley-warner_mtns':
         pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv2_8/%s.csv' %(watershed))
         sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv2_8/%s.csv'%(watershed))
@@ -428,19 +428,19 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
             txt1 = 'Snowpack in the {} is above normal at {}% of median, compared to {}% at this time last year. '.format(cleantxt,str(int(swe_pct_cur)),str(int(swe_pct_last)))
         elif swe_pct_cur>=130:
             txt1 = 'Snowpack in the {} is well above normal at {}% of median, compared to {}% at this time last year. '.format(cleantxt,str(int(swe_pct_cur)),str(int(swe_pct_last)))
-    if watershed == 'state_of_nevada' and s_cur >0: 
-        if swe_pct_cur == swe_pct_last:
-            txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is well below normal at {}% of median, which is the same as this time last year. '.format(str(int(swe_pct_cur)))                       
-        elif swe_pct_cur<=70:
-            txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is well below normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last))           )
-        elif swe_pct_cur>70 and swe_pct_cur<90:
-            txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is below normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last)))        
-        elif swe_pct_cur>=90 and swe_pct_cur<=110:
-            txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is about normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last)))
-        elif swe_pct_cur>110 and swe_pct_cur<130:
-            txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is above normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last)))
-        elif swe_pct_cur>=130:
-            txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is well above normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last)))    
+    # if watershed == 'state_of_nevada' and s_cur >0: 
+    #     if swe_pct_cur == swe_pct_last:
+    #         txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is well below normal at {}% of median, which is the same as this time last year. '.format(str(int(swe_pct_cur)))                       
+    #     elif swe_pct_cur<=70:
+    #         txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is well below normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last))           )
+    #     elif swe_pct_cur>70 and swe_pct_cur<90:
+    #         txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is below normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last)))        
+    #     elif swe_pct_cur>=90 and swe_pct_cur<=110:
+    #         txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is about normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last)))
+    #     elif swe_pct_cur>110 and swe_pct_cur<130:
+    #         txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is above normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last)))
+    #     elif swe_pct_cur>=130:
+    #         txt1 = 'The snowpack across Northern Nevada and the Eastern Sierra (Truckee, Tahoe, Carson and Walker basins) is well above normal at {}% of median, compared to {}% at this time last year. '.format(str(int(swe_pct_cur)),str(int(swe_pct_last)))    
     if watershed == 'Upper_Colorado_Region' and s_cur >0: 
         if swe_pct_cur == swe_pct_last:
             txt1 = 'Snowpack in the {} above Lake Powell is well below normal at {}% of median, which is the same as this time last year. '.format(cleantxt,str(int(swe_pct_cur)))           
@@ -491,7 +491,7 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     
     if allsites == []:
         txt4 = ''
-    elif watershed == 'state_of_nevada_and_eastern_sierra':
+    elif watershed == 'state_of_nevada':
         txt4=''
     elif basin_res_pct_this == basin_res_pct_last:
         txt4 = 'Reservoir storage is {}% of capacity, same as last year at this time. '.format(str(int(basin_res_pct_this)))
