@@ -7,14 +7,15 @@ Created on Thu Jan 16 13:00:36 2025
 # load report data using the API
 
 def LoadBasicReportData_WSOR_NV(ReportMonth,ReportYear):
-    import requests
     import pandas as pd
-    
+    from data_processing.api_helpers import safe_api
+
     #########################
     # ReportMonth = 8
     # ReportYear = 2024 #If running on Oct 1, leave as previous WY
     #########################
     
+    AWS_DOMAIN = "https://nwcc-apps.sc.egov.usda.gov"
     
     watershedlist = [  
                         'state of nevada',#' and eastern sierra',
@@ -41,13 +42,24 @@ def LoadBasicReportData_WSOR_NV(ReportMonth,ReportYear):
     #download data from API for each basin type
     
     #precip
-    prec_url = f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getPrecData?basinType=nv&pubMonth={ReportMonth}&pubYear={ReportYear}&format=json'
-    prec_api = requests.get(prec_url)
-    prec_json = prec_api.json()
+    endpoint = "/aws-api/wsor/getPrecData"
+    url = AWS_DOMAIN + endpoint
+    params = {"basinType": "nv",
+              "pubMonth": ReportMonth,
+              "pubYear": ReportYear,
+              "format": "json"}
+    prec_json = safe_api(url,params)
+    
+
     #reservoirs
-    res_url = f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getResData?basinType=nv&pubMonth={ReportMonth}&pubYear={ReportYear}&format=json'
-    res_api = requests.get(res_url)
-    res_json = res_api.json()
+    endpoint = "/aws-api/wsor/getResData"
+    url = AWS_DOMAIN + endpoint
+    params = {"basinType": "nv",
+              "pubMonth": ReportMonth,
+              "pubYear": ReportYear,
+              "format": "json"}
+    res_json = safe_api(url,params)
+
     
     # build lists for basin-wide precip, basin-wide res, and a dictionary for individual res values
     # the individual reservoir data is nice to have in nested format, so we don't want it in a dataframe yet

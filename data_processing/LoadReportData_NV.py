@@ -32,9 +32,10 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     #from CalculateSWSI_v2 import CalculateSWSI_v2
     import math
     #from GetPctMed_NV import GetPctMed_NV
-    import requests
-    
+    from data_processing.api_helpers import safe_api,safe_read_csv
 
+    AWS_DOMAIN = "https://nwcc-apps.sc.egov.usda.gov"
+    
     # watershedlist = [  
     #                         'state_of_nevada_and_eastern_sierra',
     #                         'lake_tahoe',
@@ -82,42 +83,97 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     allpcpmonths = []
     MonthlyPctMed = []
     
-    for i in range(len(loadmonths)):
-        print(f'Loading {wshed_alt} monthly precip Stats From the NWCC Apps API: '+str(loadmonths[i]))
-        monthstr = str(loadmonths[i])
-        print(monthstr)
+    endpoint = "/aws-api/wsor/getPrecData"
+    url = AWS_DOMAIN + endpoint
+    
+    for m in loadmonths:
+        print(f'Loading {wshed_alt} monthly precip stats for month {m}')
+
+        year = ReportYear - 1 if m >= 11 else ReportYear
+
+        params = {
+            "state": "CO",
+            "pubMonth": m,
+            "pubYear": year,
+            "basinType": basintype,
+            "format": "json"
+        }
+        data = safe_api(url, params)
+        if data is None:
+            print(f"Warning: No data returned for month {m}, year {year}")
+            allpcpmonths.append(None)
+            continue
+        try:
+            val = data[wshed_alt][0]["basin_index"]["prec_mnth_curr_per_med"]
+        except Exception as e:
+            print(f"Error extracting precip for month {m}: {e}")
+            val = None
+        allpcpmonths.append(val) 
         
-        if loadmonths[i]>=11:
-            yearstr = str(ReportYear-1)
-        else:
-            yearstr = str(ReportYear)
-        print(yearstr)
-        r = requests.get(f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getPrecData?state=CO&pubMonth={monthstr}&pubYear={yearstr}&basinType={basintype}&format=json')
-        r.ok
-        j = r.json()
-        prec_mnth_curr_per_med = j[wshed_alt][0]['basin_index']['prec_mnth_curr_per_med']
-        allpcpmonths.append(prec_mnth_curr_per_med)
+        # prec_mnth_curr_per_med = j[wshed_alt][0]['basin_index']['prec_mnth_curr_per_med']
+        # allpcpmonths.append(prec_mnth_curr_per_med)
         
     MonthlyPctMed = pd.DataFrame(allpcpmonths).T
     
-    if ReportMonth == 1:
-        MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp']
-    if ReportMonth == 2:
-        MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp']
-    if ReportMonth == 3:
-        MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp']
-    if ReportMonth == 4:
-        MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp','March_pcp']
-    if ReportMonth == 5:
-        MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp','March_pcp','Apr_pcp']
-        
-      
-    pcp_pct_cur = requests.get(f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getPrecData?state=CO&pubMonth={ReportMonth_str}&pubYear={ReportYear_str}&basinType={basintype}&format=json').json()[wshed_alt][0]['basin_index']['prec_ytd_curr_per_med']
-    pcp_pct_month = requests.get(f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getPrecData?state=CO&pubMonth={ReportMonth_str}&pubYear={ReportYear_str}&basinType={basintype}&format=json').json()[wshed_alt][0]['basin_index']['prec_mnth_curr_per_med']
-    snow = requests.get(f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getSnowData?state=CO&pubMonth={ReportMonth_str}&pubYear={ReportYear_str}&basinType={basintype}&format=json')  
+    # if ReportMonth == 1:
+    #     MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp']
+    # if ReportMonth == 2:
+    #     MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp']
+    # if ReportMonth == 3:
+    #     MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp']
+    # if ReportMonth == 4:
+    #     MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp','March_pcp']
+    # if ReportMonth == 5:
+    #     MonthlyPctMed.columns = ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp','March_pcp','Apr_pcp']
     
-    swe_pct_cur = snow.json()[wshed_alt][0]['basin_index']['wteq_curr_per_med']    
-    swe_pct_last = snow.json()[wshed_alt][0]['basin_index']['wteq_ly_per_med']   
+    colnames = {
+        1: ['Oct_pcp','Nov_pcp','Dec_pcp'],
+        2: ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp'],
+        3: ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp'],
+        4: ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp','March_pcp'],
+        5: ['Oct_pcp','Nov_pcp','Dec_pcp','Jan_pcp','Feb_pcp','March_pcp','Apr_pcp']
+    }    
+    
+    MonthlyPctMed.columns = colnames[ReportMonth]    
+    params = {
+        "state": "CO",
+        "pubMonth": ReportMonth,
+        "pubYear": ReportYear,
+        "basinType": basintype,
+        "format": "json"
+    }
+    endpoint = "/aws-api/wsor/getPrecData"
+    url = AWS_DOMAIN + endpoint 
+    prec_now = safe_api(url, params)
+    
+    endpoint = "/aws-api/wsor/getSnowData"
+    url = AWS_DOMAIN + endpoint
+    snow_now = safe_api(url, params)
+    
+    pcp_pct_cur = None
+    pcp_pct_month = None
+    swe_pct_cur = None
+    swe_pct_last = None
+    
+    if prec_now:
+        try:
+            pcp_pct_cur = prec_now[wshed_alt][0]["basin_index"]["prec_ytd_curr_per_med"]
+            pcp_pct_month = prec_now[wshed_alt][0]["basin_index"]["prec_mnth_curr_per_med"]
+        except Exception as e:
+            print(f"Error extracting precip fields: {e}")
+    
+    if snow_now:
+        try:
+            swe_pct_cur = snow_now[wshed_alt][0]["basin_index"]["wteq_curr_per_med"]
+            swe_pct_last = snow_now[wshed_alt][0]["basin_index"]["wteq_ly_per_med"]
+        except Exception as e:
+            print(f"Error extracting snow fields: {e}")
+    # pcp_pct_cur = requests.get(f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getPrecData?state=CO&pubMonth={ReportMonth_str}&pubYear={ReportYear_str}&basinType={basintype}&format=json').json()[wshed_alt][0]['basin_index']['prec_ytd_curr_per_med']
+    # pcp_pct_month = requests.get(f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getPrecData?state=CO&pubMonth={ReportMonth_str}&pubYear={ReportYear_str}&basinType={basintype}&format=json').json()[wshed_alt][0]['basin_index']['prec_mnth_curr_per_med']
+    # snow = requests.get(f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getSnowData?state=CO&pubMonth={ReportMonth_str}&pubYear={ReportYear_str}&basinType={basintype}&format=json')  
+    
+    # swe_pct_cur = snow.json()[wshed_alt][0]['basin_index']['wteq_curr_per_med']    
+    # swe_pct_last = snow.json()[wshed_alt][0]['basin_index']['wteq_ly_per_med']   
     
     if swe_pct_cur is None:
         swe_pct_cur = -9999
@@ -292,10 +348,17 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     if  allsites!=[] and (watershed =='Upper_Colorado_Region' or watershed =='state_of_nevada') :  
         # need to grab lakes powell, mead, and mohave separately
         # make sure wy is converted to calendar year (only needed for autumn time reports)
-
-        col_res_url = f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getResData?basinType=ca&pubMonth={ReportMonth}&pubYear={ReportYear}&basin=Colorado&format=json'
-        col_res_api = requests.get(col_res_url)
-        col_res_json = col_res_api.json()
+        
+        endpoint = "/aws-api/wsor/getResData"
+        col_res_url = AWS_DOMAIN + endpoint
+        # col_res_url = f'https://nwcc-apps.sc.egov.usda.gov/aws-api/wsor/getResData?basinType=ca&pubMonth={ReportMonth}&pubYear={ReportYear}&basin=Colorado&format=json'
+        params = {"basinType":"ca",
+                  "pubMonth":ReportMonth,
+                  "pubYear":ReportYear,
+                  "basin":"Colorado",
+                  "format":"json"}
+        # col_res_api = requests.get(col_res_url)
+        col_res_json = safe_api(col_res_url, params)
                
         col_keys = ['09379900:AZ:BOR','09421000:AZ:BOR','09422500:AZ:BOR']
         
@@ -330,24 +393,70 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     
     
     print('Downloading SWE, PCP, and Soil Moisture Data')
-    if watershed !='state_of_nevada' and watershed !='surprise_valley-warner_mtns' and watershed != 'Upper_Colorado_Region':
-        #download precip, swe, and soil moisture data from the web
-        pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv_8/%s.csv' %(watershed))
-        sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv_8/%s.csv'%(watershed))
-        moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUCnv_8/%s.csv'%(watershed))
-    elif watershed =='state_of_nevada':
-        #statewide data
-        sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv3/state_of_nevada.csv')
-        pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv3/state_of_nevada.csv')
-        moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUCnv3/state_of_nevada.csv')
-    elif watershed == 'surprise_valley-warner_mtns':
-        pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv2_8/%s.csv' %(watershed))
-        sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv2_8/%s.csv'%(watershed))
-        moiall = []    
-    elif watershed == 'Upper_Colorado_Region':   
-        pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUC2/14_%s.csv' %(watershed))
-        sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUC2/14_%s.csv'%(watershed))
-        moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUC2/14_%s.csv'%(watershed))   
+    
+    base_url = AWS_DOMAIN + "/awdb/basin-plots/POR"
+
+    if (
+        watershed != "state_of_nevada"
+        and watershed != "surprise_valley-warner_mtns"
+        and watershed != "Upper_Colorado_Region"
+    ):
+        # Standard Nevada HUC8 case
+        pcp_url = f"{base_url}/PREC/assocHUCnv_8/{watershed}.csv"
+        swe_url = f"{base_url}/WTEQ/assocHUCnv_8/{watershed}.csv"
+        moi_url = f"{base_url}/SMS/assocHUCnv_8/{watershed}.csv"
+    
+        pcpall = safe_read_csv(pcp_url)
+        sweall = safe_read_csv(swe_url)
+        moiall = safe_read_csv(moi_url)
+    
+    elif watershed == "state_of_nevada":
+        # Statewide Nevada (HUC3)
+        pcp_url = f"{base_url}/PREC/assocHUCnv3/state_of_nevada.csv"
+        swe_url = f"{base_url}/WTEQ/assocHUCnv3/state_of_nevada.csv"
+        moi_url = f"{base_url}/SMS/assocHUCnv3/state_of_nevada.csv"
+    
+        pcpall = safe_read_csv(pcp_url)
+        sweall = safe_read_csv(swe_url)
+        moiall = safe_read_csv(moi_url)
+    
+    elif watershed == "surprise_valley-warner_mtns":
+        # Special HUC2_8 case
+        pcp_url = f"{base_url}/PREC/assocHUCnv2_8/{watershed}.csv"
+        swe_url = f"{base_url}/WTEQ/assocHUCnv2_8/{watershed}.csv"
+    
+        pcpall = safe_read_csv(pcp_url)
+        sweall = safe_read_csv(swe_url)
+        moiall = []   # No soil moisture for this watershed
+    
+    elif watershed == "Upper_Colorado_Region":
+        # Upper Colorado Region (HUC2)
+        pcp_url = f"{base_url}/PREC/assocHUC2/14_{watershed}.csv"
+        swe_url = f"{base_url}/WTEQ/assocHUC2/14_{watershed}.csv"
+        moi_url = f"{base_url}/SMS/assocHUC2/14_{watershed}.csv"
+    
+        pcpall = safe_read_csv(pcp_url)
+        sweall = safe_read_csv(swe_url)
+        moiall = safe_read_csv(moi_url)
+
+    # if watershed !='state_of_nevada' and watershed !='surprise_valley-warner_mtns' and watershed != 'Upper_Colorado_Region':
+    #     #download precip, swe, and soil moisture data from the web
+    #     pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv_8/%s.csv' %(watershed))
+    #     sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv_8/%s.csv'%(watershed))
+    #     moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUCnv_8/%s.csv'%(watershed))
+    # elif watershed =='state_of_nevada':
+    #     #statewide data
+    #     sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv3/state_of_nevada.csv')
+    #     pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv3/state_of_nevada.csv')
+    #     moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUCnv3/state_of_nevada.csv')
+    # elif watershed == 'surprise_valley-warner_mtns':
+    #     pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUCnv2_8/%s.csv' %(watershed))
+    #     sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUCnv2_8/%s.csv'%(watershed))
+    #     moiall = []    
+    # elif watershed == 'Upper_Colorado_Region':   
+    #     pcpall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/PREC/assocHUC2/14_%s.csv' %(watershed))
+    #     sweall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/WTEQ/assocHUC2/14_%s.csv'%(watershed))
+    #     moiall = pd.read_csv('https://nwcc-apps.sc.egov.usda.gov/awdb/basin-plots/POR/SMS/assocHUC2/14_%s.csv'%(watershed))   
     
     #identify columns of interest in the big dataframes downloaded above
     curyear_pcp = [col for col in pcpall if  col.startswith(str(ReportYear)) or col.startswith(str(ReportYear-1)) or col.startswith('Min') or col.startswith('Max') or col.startswith("Median ('91-'20)") or col.startswith('10%') or col.startswith('30%') or col.startswith('70%') or col.startswith('90%')     ]
