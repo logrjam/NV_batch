@@ -490,17 +490,17 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     
     
     #extract current, last year, and normal SWE.  calculate the percentages.  NOTE: '2020' is basically a dummy year in the index.
-    s_cur=round(float(swe.loc['2020'+'-'+str(ReportMonth)+'-01',swe.columns.str.startswith(str(ReportYear))]),1)
-    s_last=round(float(swe.loc['2020'+'-'+str(ReportMonth)+'-01',swe.columns.str.startswith(str(ReportYear-1))]),1)
-    s_norm=round(float(swe.loc['2020'+'-'+str(ReportMonth)+'-01',swe.columns.str.startswith('Median')]),1)    
+    s_cur=round(float(swe.loc['2020'+'-'+str(ReportMonth)+'-01',swe.columns.str.startswith(str(ReportYear))].iloc[0]),1)
+    s_last=round(float(swe.loc['2020'+'-'+str(ReportMonth)+'-01',swe.columns.str.startswith(str(ReportYear-1))].iloc[0]),1)
+    s_norm=round(float(swe.loc['2020'+'-'+str(ReportMonth)+'-01',swe.columns.str.startswith('Median')].iloc[0]),1)    
     
     
     
     
     
     if len(moiall)!=0:
-        sm_cur=round(float(moi.loc['2020'+'-'+str(ReportMonth)+'-01',moi.columns.str.startswith(str(ReportYear))]))
-        sm_last=round(float(moi.loc['2020'+'-'+str(ReportMonth)+'-01',moi.columns.str.startswith(str(ReportYear-1))]))
+        sm_cur=round(float(moi.loc['2020'+'-'+str(ReportMonth)+'-01',moi.columns.str.startswith(str(ReportYear))].iloc[0]))
+        sm_last=round(float(moi.loc['2020'+'-'+str(ReportMonth)+'-01',moi.columns.str.startswith(str(ReportYear-1))].iloc[0]))
     else:
         sm_cur = []
         sm_last = []
