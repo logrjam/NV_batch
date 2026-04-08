@@ -208,7 +208,7 @@ def main():
                           '\nOct: {}'\
                           '\nNov: {}'\
                           '\nDec: {}'\
-                          .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp))\
+                          .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()))\
                           ,transform = ax2.transAxes\
                           ,fontsize = 8)                             
             elif ReportMonth == 2:
@@ -217,7 +217,7 @@ def main():
                             '\nNov: {}'\
                             '\nDec: {}'\
                             '\nJan: {}'
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)    
             elif ReportMonth == 3:
@@ -227,7 +227,7 @@ def main():
                             '\nDec: {}'\
                             '\nJan: {}'\
                             '\nFeb: {}'
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)                           
             elif ReportMonth == 4:
@@ -238,7 +238,7 @@ def main():
                             '\nJan: {}'\
                             '\nFeb: {}'\
                             '\nMar: {}'\
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp),int(pcp_monthly.March_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()),int(pcp_monthly.March_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)                            
             elif ReportMonth == 5:
@@ -250,7 +250,7 @@ def main():
                             '\nFeb: {}'\
                             '\nMar: {}'\
                             '\nApr: {}'\
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp),int(pcp_monthly.March_pcp),int(pcp_monthly.Apr_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()),int(pcp_monthly.March_pcp.item()),int(pcp_monthly.Apr_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8) 
        
@@ -287,7 +287,7 @@ def main():
                           '\nOct: {}'\
                           '\nNov: {}'\
                           '\nDec: {}'\
-                          .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp))\
+                          .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()))\
                           ,transform = ax2.transAxes\
                           ,fontsize = 8)                             
             elif ReportMonth == 2:
@@ -296,7 +296,7 @@ def main():
                             '\nNov: {}'\
                             '\nDec: {}'\
                             '\nJan: {}'
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)    
             elif ReportMonth == 3:
@@ -306,7 +306,7 @@ def main():
                             '\nDec: {}'\
                             '\nJan: {}'\
                             '\nFeb: {}'
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)                           
             elif ReportMonth == 4:
@@ -317,7 +317,7 @@ def main():
                             '\nJan: {}'\
                             '\nFeb: {}'\
                             '\nMar: {}'\
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp),int(pcp_monthly.March_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()),int(pcp_monthly.March_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)                            
             elif ReportMonth == 5:
@@ -329,7 +329,7 @@ def main():
                             '\nFeb: {}'\
                             '\nMar: {}'\
                             '\nApr: {}'\
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp),int(pcp_monthly.March_pcp),int(pcp_monthly.Apr_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()),int(pcp_monthly.March_pcp.item()),int(pcp_monthly.Apr_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8) 
             
@@ -364,7 +364,7 @@ def main():
                           '\nOct: {}'\
                           '\nNov: {}'\
                           '\nDec: {}'\
-                          .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp))\
+                          .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()))\
                           ,transform = ax2.transAxes\
                           ,fontsize = 8)                             
             elif ReportMonth == 2:
@@ -373,7 +373,7 @@ def main():
                             '\nNov: {}'\
                             '\nDec: {}'\
                             '\nJan: {}'
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)    
             elif ReportMonth == 3:
@@ -383,7 +383,7 @@ def main():
                             '\nDec: {}'\
                             '\nJan: {}'\
                             '\nFeb: {}'
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)                           
             elif ReportMonth == 4:
@@ -394,7 +394,7 @@ def main():
                             '\nJan: {}'\
                             '\nFeb: {}'\
                             '\nMar: {}'\
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp),int(pcp_monthly.March_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()),int(pcp_monthly.March_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8)                            
             elif ReportMonth == 5:
@@ -406,7 +406,7 @@ def main():
                             '\nFeb: {}'\
                             '\nMar: {}'\
                             '\nApr: {}'\
-                            .format(int(pcp_monthly.Oct_pcp),int(pcp_monthly.Nov_pcp),int(pcp_monthly.Dec_pcp),int(pcp_monthly.Jan_pcp),int(pcp_monthly.Feb_pcp),int(pcp_monthly.March_pcp),int(pcp_monthly.Apr_pcp))\
+                            .format(int(pcp_monthly.Oct_pcp.item()),int(pcp_monthly.Nov_pcp.item()),int(pcp_monthly.Dec_pcp.item()),int(pcp_monthly.Jan_pcp.item()),int(pcp_monthly.Feb_pcp.item()),int(pcp_monthly.March_pcp.item()),int(pcp_monthly.Apr_pcp.item()))\
                             ,transform = ax2.transAxes\
                             ,fontsize = 8) 
         
