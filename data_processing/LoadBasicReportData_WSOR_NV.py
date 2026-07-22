@@ -31,7 +31,8 @@ def LoadBasicReportData_WSOR_NV(ReportMonth,ReportYear):
                         'owyhee',
                         'eastern nevada',
                         'spring mountains',
-                        'surprise valley-warner mtns'
+                        'surprise valley-warner mtns',
+                        "virgin"
                   ]
 
     

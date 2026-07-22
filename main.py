@@ -66,7 +66,8 @@ def main():
                             'eastern_nevada',
                             'spring_mountains',
                             'surprise_valley-warner_mtns',
-                            'Upper_Colorado_Region'
+                            'Upper_Colorado_Region',
+                            "virgin"
                       ]
     
     
@@ -78,7 +79,7 @@ def main():
     for i in range(len(watershedlist)):
         
         wshed = watershedlist[i]
-            
+    
             
         [pcp,swe,moi,res,pcp_monthly,txt,fname1,cleantxt,curswepct,curpcppct,smcur]=LoadReportData_NV(wshed,ReportYear,ReportMonth,prec_df_api,basin_res_df_api,res_d)
         print("Generating Summary Plot for " + cleantxt)
@@ -139,11 +140,12 @@ def main():
                 walker_res = ['Topaz Lk nr Topaz','Bridgeport Reservoir']
                 humboldt_res = ['Rye Patch Re nr Rye Patch, NV','Chimney Creek Reservoir']
                 owyhee_res = ['Wild Horse Reservoir']
+                virgin_res = ["Kolob Reservoir","Gunlock","Ivins","Sand Hollow Reservoir","Quail Creek"]
                 lowercolorado_res = ['Lake Mohave','Lake Mead','Lake Powell']
                 
                 mydict = {
                     'Watershed/Region': 
-                         ['Lake Tahoe','Truckee\nBasin','Carson Basin','Walker Basin','Humboldt\nBasin','Owyhee\nBasin','Lwr. Colorado\nBasin'],  
+                         ['Lake Tahoe','Truckee\nBasin','Carson Basin','Walker Basin','Humboldt\nBasin','Owyhee\nBasin',"Virgin Basin",'Lwr. Colorado\nBasin'],  
                     
                 "storage_basin_prev": 
                     [
@@ -153,6 +155,7 @@ def main():
                       int(res.loc[walker_res,'res_ly'].sum()/res.loc[walker_res,'res_cap'].sum()*100),\
                       int(res.loc[humboldt_res,'res_ly'].sum()/res.loc[humboldt_res,'res_cap'].sum()*100),\
                       int(res.loc[owyhee_res,'res_ly'].sum()/res.loc[owyhee_res,'res_cap'].sum()*100),\
+                      int(res.loc[virgin_res,'res_ly'].sum()/res.loc[virgin_res,'res_cap'].sum()*100),\
                       int(res.loc[lowercolorado_res,'res_ly'].sum()/res.loc[lowercolorado_res,'res_cap'].sum()*100)],
                    
                 "storage_basin_cur": 
@@ -163,6 +166,7 @@ def main():
                       int(res.loc[walker_res,'res_curr'].sum()/res.loc[walker_res,'res_cap'].sum()*100),\
                       int(res.loc[humboldt_res,'res_curr'].sum()/res.loc[humboldt_res,'res_cap'].sum()*100),\
                       int(res.loc[owyhee_res,'res_curr'].sum()/res.loc[owyhee_res,'res_cap'].sum()*100),\
+                      int(res.loc[virgin_res,'res_curr'].sum()/res.loc[virgin_res,'res_cap'].sum()*100),\
                       int(res.loc[lowercolorado_res,'res_curr'].sum()/res.loc[lowercolorado_res,'res_cap'].sum()*100)]
                         }
                           

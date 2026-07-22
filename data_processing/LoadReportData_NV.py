@@ -188,7 +188,12 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
 
     
     if watershed =='state_of_nevada':
-        allsites = ['Lake Tahoe','Marlette Lk nr Carson City','Donner Lake','Prosser Reservoir','Independence Lake','Stampede Reservoir','Boca Reservoir','Lahontan Reservoir','Topaz Lk nr Topaz','Bridgeport Reservoir','Rye Patch Re nr Rye Patch, NV','Chimney Creek Reservoir','Wild Horse Reservoir','Lake Mohave','Lake Mead','Lake Powell']
+        allsites = [
+            'Lake Tahoe','Marlette Lk nr Carson City','Donner Lake','Prosser Reservoir','Independence Lake',
+            'Stampede Reservoir','Boca Reservoir','Lahontan Reservoir','Topaz Lk nr Topaz','Bridgeport Reservoir',
+            'Rye Patch Re nr Rye Patch, NV','Chimney Creek Reservoir','Wild Horse Reservoir',
+            "Gunlock","Ivins","Kolob Reservoir","Quail Creek","Sand Hollow Reservoir",
+            'Lake Mohave','Lake Mead','Lake Powell']
         subbasins = []
         subbasin_clean = []
         SWSI_shed = []
@@ -307,6 +312,14 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
         fname = '13_ColoradoBasin'
         wshed_alt = ['Upper Colorado Region']  
         cleantxt = 'Colorado Basin'   
+    elif watershed == "virgin":
+        allsites =["Gunlock","Ivins","Kolob Reservoir","Quail Creek","Sand Hollow Reservoir"]
+        subbasins=[]
+        subbasin_clean=[]
+        SWSI_shed=[]
+        fname = '15_Virgin'
+        wshed_alt = "virgin"
+        cleantxt = 'Virgin River Basin'
         
     
     start = str(ReportYear-10)+'-'+'01'+'-'+'01'
@@ -319,7 +332,8 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
         
         # reservoir station triplets from meta data are keys
         triplet_keys = list(res_d[wshed_alt]['site_meta'].keys()) #grab watershed according to its list index
-
+        
+            
         res_data = []
         for i in range(len(triplet_keys)): # loop through keys (triplets)
             
@@ -344,7 +358,7 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
         # filter for reservoirs within the watershed only
         res = ind_res_df[ind_res_df.index.isin(allsites)]
     
-    # reservoirs on colorado need to be handled differently    
+    # reservoirs on colorado or virgin basin (in UT) need to be handled differently    
     if  allsites!=[] and (watershed =='Upper_Colorado_Region' or watershed =='state_of_nevada') :  
         # need to grab lakes powell, mead, and mohave separately
         # make sure wy is converted to calendar year (only needed for autumn time reports)
@@ -376,10 +390,29 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
         col_res_df['res_curr_per_cap'] = (col_res_df['res_curr']/col_res_df['res_cap']*100)
         col_res_df['res_ly_per_cap'] = (col_res_df['res_ly']/col_res_df['res_cap']*100)
         col_res_df = col_res_df.set_index('name')
-        # slap colorado res numbers into bigger dataframe
-        if watershed == 'state_of_nevada':
-            res = pd.concat([res, col_res_df])
+        
+        if watershed == "state_of_nevada": # Virgin reservoirs aren't naturally included in nevada list since they are in UT
+            virgin_keys = list(res_d["virgin"]['site_meta'].keys())
+            virgin_res =[]
+            for key in virgin_keys:
+                virgin_res.append(
+                    {
+                        'name': res_d["virgin"]['site_meta'][key]['name'],
+                        'res_cap': res_d["virgin"]['res_cap'][key],
+                        'res_curr': res_d["virgin"]['res_curr'][key],
+                        'res_ly': res_d["virgin"]['res_ly'][key],
+                        }
+                    )
+            virgin_res_df = pd.DataFrame(virgin_res)
+            virgin_res_df['res_curr_per_cap'] = (virgin_res_df['res_curr']/virgin_res_df['res_cap']*100)
+            virgin_res_df['res_ly_per_cap'] = (virgin_res_df['res_ly']/virgin_res_df['res_cap']*100)
+            virgin_res_df = virgin_res_df.set_index('name')
+            
+            # slap colorado and virgin  res numbers into bigger dataframe
+            res = pd.concat([res, virgin_res_df, col_res_df])
+        
         else: res = col_res_df # for Upper Colorado Watershed
+        
     elif allsites ==[]:
          res = []
     
@@ -399,13 +432,13 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
     if (
         watershed != "state_of_nevada"
         and watershed != "surprise_valley-warner_mtns"
+        and watershed != "virgin"
         and watershed != "Upper_Colorado_Region"
     ):
         # Standard Nevada HUC8 case
         pcp_url = f"{base_url}/PREC/assocHUCnv_8/{watershed}.csv"
         swe_url = f"{base_url}/WTEQ/assocHUCnv_8/{watershed}.csv"
         moi_url = f"{base_url}/SMS/assocHUCnv_8/{watershed}.csv"
-    
         pcpall = safe_read_csv(pcp_url)
         sweall = safe_read_csv(swe_url)
         moiall = safe_read_csv(moi_url)
@@ -415,7 +448,6 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
         pcp_url = f"{base_url}/PREC/assocHUCnv3/state_of_nevada.csv"
         swe_url = f"{base_url}/WTEQ/assocHUCnv3/state_of_nevada.csv"
         moi_url = f"{base_url}/SMS/assocHUCnv3/state_of_nevada.csv"
-    
         pcpall = safe_read_csv(pcp_url)
         sweall = safe_read_csv(swe_url)
         moiall = safe_read_csv(moi_url)
@@ -424,17 +456,24 @@ def LoadReportData_NV(watershed,ReportYear,ReportMonth,prec_df_api,basin_res_df_
         # Special HUC2_8 case
         pcp_url = f"{base_url}/PREC/assocHUCnv2_8/{watershed}.csv"
         swe_url = f"{base_url}/WTEQ/assocHUCnv2_8/{watershed}.csv"
-    
         pcpall = safe_read_csv(pcp_url)
         sweall = safe_read_csv(swe_url)
         moiall = []   # No soil moisture for this watershed
-    
+        
+    elif watershed == "virgin":
+        # Special HUC2_8 case
+        pcp_url = f"{base_url}/PREC/assocHUCnv2_8/{watershed}.csv"
+        swe_url = f"{base_url}/WTEQ/assocHUCnv2_8/{watershed}.csv"
+        moi_url = f"{base_url}/SMS/assocHUCnv2_8/{watershed}.csv"
+        pcpall = safe_read_csv(pcp_url)
+        sweall = safe_read_csv(swe_url)
+        moiall = safe_read_csv(moi_url)
+        
     elif watershed == "Upper_Colorado_Region":
         # Upper Colorado Region (HUC2)
         pcp_url = f"{base_url}/PREC/assocHUC2/14_{watershed}.csv"
         swe_url = f"{base_url}/WTEQ/assocHUC2/14_{watershed}.csv"
         moi_url = f"{base_url}/SMS/assocHUC2/14_{watershed}.csv"
-    
         pcpall = safe_read_csv(pcp_url)
         sweall = safe_read_csv(swe_url)
         moiall = safe_read_csv(moi_url)
