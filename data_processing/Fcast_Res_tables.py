@@ -21,7 +21,7 @@ def GetFcastResTables(ReportMonth, ReportYear,prec_df_api,basin_res_df_api,res_d
     import requests
     import os
     from datetime import datetime
-    from LoadReportData_NV import LoadReportData_NV
+    from data_processing.LoadReportData_NV import LoadReportData_NV
 
 
     rootpath = 'C:/USDA/Work/ReportDocs/Jeff_WSOR_Docs/'
@@ -34,7 +34,7 @@ def GetFcastResTables(ReportMonth, ReportYear,prec_df_api,basin_res_df_api,res_d
     rise_json = requests.get(rise_url).json()
     
     watershedlist = [  
-                            'state of nevada and eastern sierra',
+                            'state of nevada',
                             'lake tahoe',
                             'truckee',
                             'carson',
@@ -68,7 +68,6 @@ def GetFcastResTables(ReportMonth, ReportYear,prec_df_api,basin_res_df_api,res_d
             "05": "MAY", "06": "JUN", "07": "JUL", "08": "AUG",
             "09": "SEP", "10": "OCT", "11": "NOV", "12": "DEC"
         }
-        
         
         tahoe_rows = []
         if RiseInAPI:
@@ -179,10 +178,24 @@ def GetFcastResTables(ReportMonth, ReportYear,prec_df_api,basin_res_df_api,res_d
         
         dfs[watershed]=df
 
-
+    # units for Pyramid Lake Elevation change in Truckee watershed need to be converted
+    df_truckee = dfs["truckee"]
+    cols_to_convert = ["90% (KAF)","70% (KAF)","50% (KAF)","30% (KAF)","10% (KAF)"]
+    
+    df_truckee.loc[
+        df_truckee["Forecast Point"]=="Pyramid Lake Elevation Change",
+        cols_to_convert
+    ] = (
+        df_truckee.loc[
+            df_truckee["Forecast Point"]=="Pyramid Lake Elevation Change",
+            cols_to_convert
+        ] * 1000
+    )
+    
+        
     # Build reservoir dataframe
     
-    [_,_,_,res,_,_,_,title,_,_,_]=LoadReportData_NV('state_of_nevada_and_eastern_sierra',ReportYear,ReportMonth,prec_df_api,basin_res_df_api,res_d)
+    [_,_,_,res,_,_,_,title,_,_,_]=LoadReportData_NV('state_of_nevada',ReportYear,ReportMonth,prec_df_api,basin_res_df_api,res_d)
          
    
     # Check for missing data by trying to convert data to integers
@@ -265,8 +278,13 @@ def GetFcastResTables(ReportMonth, ReportYear,prec_df_api,basin_res_df_api,res_d
     from docx.oxml.ns import qn
     from docx.enum.text import WD_BREAK
     from docx2pdf import convert
+    import datetime
     
     # asterisk = "\u20F0"
+    
+    # nicely formatted date string
+    date_obj = datetime.date(ReportYear, ReportMonth, 1)
+    date_str = date_obj.strftime("%B %d, %Y")
     
     # Formatting functions
     def shade_cell(cell, fill):
@@ -383,14 +401,21 @@ def GetFcastResTables(ReportMonth, ReportYear,prec_df_api,basin_res_df_api,res_d
         # Title block
         title_para = doc.add_paragraph()
         title_para.alignment = 1
-        run1 = title_para.add_run("Water Supply Forecast Table\n")
-        run2 = title_para.add_run("Chance that actual volume will exceed forecast")
+        run1 = title_para.add_run(f"{name.title()}\n")
+        run2 = title_para.add_run(f"Streamflow Forecasts - {date_str}\n")
+        run3 = title_para.add_run("Forecast Exceedance Probabilities for Risk Assessment\n")
+        run4 = title_para.add_run("Chance that actual volume will exceed forecast")
         run1.bold = True
-        run2.italic = True
+        run1.font.size = Pt(18)
+        run2.bold = True
+        run3.font.size = Pt(10)
+        run4.italic = True
+        run4.font.size = Pt(10)
+
         tighten_paragraph_spacing(title_para, before=0, after=0)
     
         # Watershed heading
-        doc.add_heading(name.title(), level=2)
+        # doc.add_heading(name.title(), level=2)
     
         # Forecast Table
         table = doc.add_table(rows=1, cols=len(df.columns))
@@ -410,11 +435,6 @@ def GetFcastResTables(ReportMonth, ReportYear,prec_df_api,basin_res_df_api,res_d
                     shade_cell(c, "EDEDED")
             for i, val in enumerate(row):
                 row_cells[i].text = format_vals(val) if not pd.isna(val) else ""
-            if name.lower() == "great salt lake":
-                if row["Forecast Point"] == "Great Salt Lake Inflow":
-                    row_cells[0].text += "*"
-                if row["Forecast Point"] == "Great Salt Lake Rise":
-                    row_cells[0].text += "**"
             prevent_row_split(table.rows[-1])
     
         tighten_cell_paragraphs(table)
@@ -430,7 +450,7 @@ def GetFcastResTables(ReportMonth, ReportYear,prec_df_api,basin_res_df_api,res_d
         res_subset = res[res["Reservoir"].isin(res_list)]
     
         if not res_subset.empty:
-            doc.add_heading("Reservoir Storage Summary", level=2)
+            doc.add_heading("Reservoir Storage", level=2)
     
             res_table = doc.add_table(rows=1, cols=len(res_subset.columns))
             res_table.style = "Table Grid"

@@ -27,6 +27,7 @@ def main():
     import numpy as np
     from data_processing.LoadBasicReportData_WSOR_NV import LoadBasicReportData_WSOR_NV
     from data_processing.LoadReportData_NV import LoadReportData_NV
+    from data_processing.Fcast_Res_tables import GetFcastResTables
     import datetime as dt
     from docx import Document
     from docx2pdf import convert
